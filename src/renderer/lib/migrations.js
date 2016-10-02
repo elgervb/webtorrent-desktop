@@ -43,8 +43,21 @@ function run (state) {
     migrate_0_17_0(state.saved)
   }
 
+  if (semver.lt(version, config.APP_VERSION)) {
+    installHandlers(state.saved)
+  }
+
   // Config is now on the new version
   state.saved.version = config.APP_VERSION
+}
+
+// Whenever the app is updated,  re-install default handlers if the user has
+// enabled them.
+function installHandlers (saved) {
+  if (saved.prefs.isFileHandler) {
+    const ipcRenderer = require('electron').ipcRenderer
+    ipcRenderer.send('setDefaultFileHandler', true)
+  }
 }
 
 function migrate_0_7_0 (saved) {
